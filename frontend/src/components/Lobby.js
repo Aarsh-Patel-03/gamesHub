@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api";
-const SOCKET_BASE = "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_BASE_URL;
+const SOCKET_BASE = process.env.REACT_APP_SOCKET_URL;
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import io from "socket.io-client";
 
-const SOCKET_BASE = "http://localhost:5000";
+const SOCKET_BASE = process.env.REACT_APP_SOCKET_URL;
 
 // ════════════════════════════════════════════
 //  STYLES
