@@ -13,22 +13,28 @@ const app = express();
 const server = http.createServer(app);
 
 // 👇 CHANGE 1: Simplified CORS for Socket.IO
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://games-hub-indol.vercel.app",
+];
 const io = new Server(server, {
   cors: {
-    origin: "*", // 👈 Wildcard = no issues
+    origin: allowedOrigins, // 👈 Wildcard = no issues
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
 // 👇 CHANGE 2: App CORS (HTTP APIs only)
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:3002",
-      "http://localhost:3003",
-    ],
+    // origin: [
+    //   "http://localhost:3000",
+    //   "http://localhost:3001",
+    //   "http://localhost:3002",
+    //   "http://localhost:3003",
+    // ],
+    origin: allowedOrigins,
   }),
 );
 app.use(express.json());
