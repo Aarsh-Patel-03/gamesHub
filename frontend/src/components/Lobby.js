@@ -538,7 +538,7 @@ const Lobby = () => {
       .catch(console.error);
 
     return () => newSocket.close();
-  }, [token, navigate]);
+  }, [token, navigate, isHost]);
 
   const createRoom = () => {
     const id = Array.from({ length: 6 }, () =>

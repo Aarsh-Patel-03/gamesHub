@@ -842,37 +842,37 @@ const SIDE_BOT_SEATS = new Set(["seat-btm-l", "seat-btm-r"]);
 //  CARD COMPONENT
 // ════════════════════════════════════════════
 
-const CardFace = ({ card, small = false }) => {
-  if (!card) return null;
-  const sc = getSuitClass(card.suit);
-  const sz = small
-    ? { rank: "0.72rem", suit: "0.58rem", center: "1.1rem" }
-    : { rank: "0.85rem", suit: "0.65rem", center: "1.4rem" };
+// const CardFace = ({ card, small = false }) => {
+//   if (!card) return null;
+//   const sc = getSuitClass(card.suit);
+//   const sz = small
+//     ? { rank: "0.72rem", suit: "0.58rem", center: "1.1rem" }
+//     : { rank: "0.85rem", suit: "0.65rem", center: "1.4rem" };
 
-  return (
-    <>
-      <div className="card-corner">
-        <span className={`c-rank ${sc}`} style={{ fontSize: sz.rank }}>
-          {card.rank}
-        </span>
-        <span className={`c-suit ${sc}`} style={{ fontSize: sz.suit }}>
-          {card.suit}
-        </span>
-      </div>
-      <span className={`c-center ${sc}`} style={{ fontSize: sz.center }}>
-        {card.suit}
-      </span>
-      <div className="card-corner btm-right">
-        <span className={`c-rank ${sc}`} style={{ fontSize: sz.rank }}>
-          {card.rank}
-        </span>
-        <span className={`c-suit ${sc}`} style={{ fontSize: sz.suit }}>
-          {card.suit}
-        </span>
-      </div>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <div className="card-corner">
+//         <span className={`c-rank ${sc}`} style={{ fontSize: sz.rank }}>
+//           {card.rank}
+//         </span>
+//         <span className={`c-suit ${sc}`} style={{ fontSize: sz.suit }}>
+//           {card.suit}
+//         </span>
+//       </div>
+//       <span className={`c-center ${sc}`} style={{ fontSize: sz.center }}>
+//         {card.suit}
+//       </span>
+//       <div className="card-corner btm-right">
+//         <span className={`c-rank ${sc}`} style={{ fontSize: sz.rank }}>
+//           {card.rank}
+//         </span>
+//         <span className={`c-suit ${sc}`} style={{ fontSize: sz.suit }}>
+//           {card.suit}
+//         </span>
+//       </div>
+//     </>
+//   );
+// };
 
 // ==========================================
 //  COUNTDOWN OVERLAY
@@ -978,7 +978,8 @@ const GamePlayground = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [isDealing, setIsDealing] = useState(false);
   const [dealingCards, setDealingCards] = useState([]);
-  const [countdown, setCountdown] = useState(null); // 3 | 2 | 1 | null
+  // const [countdown, setCountdown] = useState(null); // 3 | 2 | 1 | null
+  const countdown = null;
   const [pendingHand, setPendingHand] = useState(null);
   // All-players-joined phase: full-screen overlay with countdown
   const [joinCountdown, setJoinCountdown] = useState(null); // 5..1 | null
@@ -1014,6 +1015,41 @@ const GamePlayground = () => {
     setErrorMsg(msg);
     setTimeout(() => setErrorMsg(""), 2500);
   }, []);
+
+  const startDealingAnimation = useCallback(() => {
+    if (!tableRef.current) return;
+
+    const tableRect = tableRef.current.getBoundingClientRect();
+    const cards = [];
+
+    for (let i = 0; i < 52; i++) {
+      const player = rotated[i % 4];
+      const seatEl = seatRefs.current[player];
+
+      if (!seatEl) continue;
+
+      const rect = seatEl.getBoundingClientRect();
+
+      cards.push({
+        id: i,
+        x: rect.left + rect.width / 2 - tableRect.left,
+        y: rect.top + rect.height / 2 - tableRect.top,
+        delay: i * 60,
+      });
+    }
+
+    setIsDealing(true);
+    setDealingCards(cards);
+
+    setTimeout(
+      () => {
+        setMyHand(pendingHand);
+        setIsDealing(false);
+        setDealingCards([]);
+      },
+      52 * 60 + 500,
+    );
+  }, [pendingHand, rotated]);
 
   useEffect(() => {
     if (!token) return navigate("/");
@@ -1213,49 +1249,19 @@ const GamePlayground = () => {
     });
 
     setSocket(s);
+    const trickTimer = trickWinnerTimer.current;
+    const countdownTimers = countdownRef.current;
+    const joinTimers = joinCountdownRef.current;
     return () => {
-      if (trickWinnerTimer.current) clearTimeout(trickWinnerTimer.current);
-      if (countdownRef.current) countdownRef.current.forEach(clearTimeout);
-      if (joinCountdownRef.current)
-        joinCountdownRef.current.forEach(clearTimeout);
+      if (trickTimer) clearTimeout(trickTimer);
+
+      if (countdownTimers) countdownTimers.forEach((t) => clearTimeout(t));
+
+      if (joinTimers) joinTimers.forEach((t) => clearTimeout(t));
+
       s.close();
     };
-  }, [roomId, token, navigate, showError]);
-
-  const startDealingAnimation = () => {
-    if (!tableRef.current) return;
-
-    const tableRect = tableRef.current.getBoundingClientRect();
-    const cards = [];
-
-    for (let i = 0; i < 52; i++) {
-      const player = rotated[i % 4];
-      const seatEl = seatRefs.current[player];
-
-      if (!seatEl) continue;
-
-      const rect = seatEl.getBoundingClientRect();
-
-      cards.push({
-        id: i,
-        x: rect.left + rect.width / 2 - tableRect.left,
-        y: rect.top + rect.height / 2 - tableRect.top,
-        delay: i * 60,
-      });
-    }
-
-    setIsDealing(true);
-    setDealingCards(cards);
-
-    setTimeout(
-      () => {
-        setMyHand(pendingHand);
-        setIsDealing(false);
-        setDealingCards([]);
-      },
-      52 * 60 + 500,
-    );
-  };
+  }, [roomId, token, navigate, showError, startDealingAnimation]);
 
   const isAnimating = joinCountdown !== null || countdown !== null || isDealing;
 
@@ -1278,7 +1284,7 @@ const GamePlayground = () => {
   const renderSeat = (seatClass, playerName) => {
     const isMe = playerName === myUsername;
     const isTurn = playerName === currentTurn;
-    const count = myHand?.length || 13; // approximate for opponents
+    // const count = myHand?.length || 13; // approximate for opponents
     const isTop = TOP_SEATS.has(seatClass);
     const isSide = SIDE_BOT_SEATS.has(seatClass);
     const pTeam = teams.A.includes(playerName) ? "A" : "B";
