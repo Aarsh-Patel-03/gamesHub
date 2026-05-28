@@ -981,6 +981,7 @@ const GamePlayground = () => {
   // const [countdown, setCountdown] = useState(null); // 3 | 2 | 1 | null
   const countdown = null;
   const [pendingHand, setPendingHand] = useState(null);
+  const pendingHandRef = useRef(null);
   // All-players-joined phase: full-screen overlay with countdown
   const [joinCountdown, setJoinCountdown] = useState(null); // 5..1 | null
   const [joinPlayers, setJoinPlayers] = useState([]);
@@ -990,7 +991,7 @@ const GamePlayground = () => {
   const countdownRef = useRef(null);
   const joinCountdownRef = useRef(null);
   const gameStartedRef = useRef(false);
-
+  const joinDoneRef = useRef(false);
   const token = localStorage.getItem("token");
   const myUsername = token
     ? JSON.parse(atob(token.split(".")[1])).username
@@ -1010,6 +1011,11 @@ const GamePlayground = () => {
     rotatedRef.current = rotated;
   }, [rotated]);
 
+  // Keep pendingHandRef in sync so startDealingAnimation never reads a stale closure
+  useEffect(() => {
+    pendingHandRef.current = pendingHand;
+  }, [pendingHand]);
+
   // Show error toast for 2.5s
   const showError = useCallback((msg) => {
     setErrorMsg(msg);
@@ -1021,9 +1027,10 @@ const GamePlayground = () => {
 
     const tableRect = tableRef.current.getBoundingClientRect();
     const cards = [];
+    const liveRotated = rotatedRef.current;
 
     for (let i = 0; i < 52; i++) {
-      const player = rotated[i % 4];
+      const player = liveRotated[i % 4];
       const seatEl = seatRefs.current[player];
 
       if (!seatEl) continue;
@@ -1043,20 +1050,21 @@ const GamePlayground = () => {
 
     setTimeout(
       () => {
-        setMyHand(pendingHand);
+        setMyHand(pendingHandRef.current);
         setIsDealing(false);
         setDealingCards([]);
+        setPendingHand(null);
       },
       52 * 60 + 500,
     );
-  }, [pendingHand, rotated]);
+  }, []);
 
   useEffect(() => {
     if (!token) return navigate("/");
 
     const s = io(SOCKET_BASE, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
     });
 
     s.on("connect", () => {
@@ -1158,14 +1166,12 @@ const GamePlayground = () => {
     //   countdownRef.current = [t1, t2, t3, t4];
     // });
     s.on("deal-hand", (hand) => {
-      setPendingHand(hand); // ONLY store hand
-    });
-    s.on("all-players-joined", (data) => {
-      setPlayers(data.players);
-
-      setTimeout(() => {
+      setPendingHand(hand);
+      pendingHandRef.current = hand; // keep ref in sync immediately
+      // Only animate if the join countdown has already finished
+      if (joinDoneRef.current) {
         startDealingAnimation();
-      }, 300);
+      }
     });
 
     // Live hand + valid-card updates after each play
@@ -1220,6 +1226,7 @@ const GamePlayground = () => {
     // All players have joined — show full-screen countdown before cards are dealt
     s.on("all-players-joined", ({ players: joinedPlayers, dealDelayMs }) => {
       setJoinPlayers(joinedPlayers || []);
+      joinDoneRef.current = false; // reset
       const totalSecs = Math.round((dealDelayMs || 5000) / 1000);
       setJoinCountdown(totalSecs);
       const timers = [];
@@ -1232,6 +1239,11 @@ const GamePlayground = () => {
         setTimeout(() => {
           setJoinCountdown(null);
           setJoinPlayers([]);
+          joinDoneRef.current = true;
+          // Only animate if deal-hand already arrived
+          if (pendingHandRef.current) {
+            startDealingAnimation();
+          }
         }, totalSecs * 1000),
       );
       joinCountdownRef.current = timers;

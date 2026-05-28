@@ -159,14 +159,27 @@ const buildScoreResult = (gs) => {
 const emitRoomUpdate = async (roomId, io) => {
   try {
     const room = await Room.findOne({ roomId });
-    if (room) io.emit("public-rooms-update", room);
+    if (!room) {
+      // Room was deleted — tell all clients to remove it
+      io.emit("public-rooms-update", { roomId, players: [] });
+      return;
+    }
+    // Only broadcast rooms that are non-full and active
+    io.emit("public-rooms-update", {
+      _id: room._id,
+      roomId: room.roomId,
+      players: room.players,
+    });
   } catch (err) {
     console.error("Room update emit error:", err);
   }
 };
 
 const emitRoomPlayersUpdate = (roomId, io, players, hostUsername) => {
-  io.to(roomId).emit("room-update", { players, host: hostUsername });
+  io.to(roomId).emit("room-update", {
+    players: players,
+    host: hostUsername,
+  });
 };
 
 // Send each player only their own hand
@@ -276,9 +289,10 @@ const socketEvents = (io) => {
 
         socket.emit("room-update", {
           players: [socket.username],
-          isHost: true,
+          host: socket.username,
         });
         socket.emit("room-created", roomId);
+        socket.emit("join-success", roomId);
         await emitRoomUpdate(roomId, io);
       } catch (err) {
         console.error("Create room error:", err);
@@ -360,8 +374,11 @@ const socketEvents = (io) => {
         // ── Case B: Player is joining the lobby room (game not started yet) ──
         if (room.players.length >= 4)
           return socket.emit("error", "Room full (4 players max)");
-        if (room.players.includes(socket.username))
+        if (room.players.includes(socket.username)) {
+          socket.join(roomId);
+          emitRoomPlayersUpdate(roomId, io, room.players, room.host);
           return socket.emit("join-success", roomId);
+        }
 
         room.players.push(socket.username);
         await room.save();

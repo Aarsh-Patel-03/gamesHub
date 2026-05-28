@@ -484,13 +484,26 @@ const Lobby = () => {
 
     const newSocket = io(SOCKET_BASE, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
     });
 
+    // ─────────────────────────────
+    // Socket Connection Status
+    // ─────────────────────────────
+
     newSocket.on("connect", () => {
+      console.log("✅ Socket connected");
       setIsSocketReady(true);
     });
-    newSocket.on("disconnect", () => setIsSocketReady(false));
+
+    newSocket.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+      setIsSocketReady(false);
+    });
+
+    // ─────────────────────────────
+    // Room Updates
+    // ─────────────────────────────
 
     newSocket.on("room-update", (data) => {
       setPlayers(data.players || []);
@@ -500,26 +513,63 @@ const Lobby = () => {
       setIsHost(data.host === myUsername);
     });
 
+    // ─────────────────────────────
+    // Public Rooms Live Sync
+    // ─────────────────────────────
+
+    newSocket.on("public-rooms-update", (updatedRoom) => {
+      setPublicRooms((prev) => {
+        const exists = prev.find((r) => r.roomId === updatedRoom.roomId);
+
+        // Update existing room
+        if (exists) {
+          // Remove room if empty
+          if (!updatedRoom.players || updatedRoom.players.length === 0) {
+            return prev.filter((r) => r.roomId !== updatedRoom.roomId);
+          }
+
+          // Replace updated room
+          return prev.map((r) =>
+            r.roomId === updatedRoom.roomId ? updatedRoom : r,
+          );
+        }
+
+        // Add new room
+        return [updatedRoom, ...prev];
+      });
+    });
+
+    // ─────────────────────────────
+    // Room Events
+    // ─────────────────────────────
+
     newSocket.on("room-created", (id) => {
       setMyRoomId(id);
+
       setError(`Room ${id} created — share with friends!`);
     });
-    newSocket.on("player-joined", (player) =>
-      setError(`${player} joined your room!`),
-    );
+
+    newSocket.on("player-joined", (player) => {
+      setError(`${player} joined your room!`);
+    });
+
     newSocket.on("join-success", (id) => {
       setMyRoomId(id);
-      setError(
-        `Joined ${id}! ${isHost ? "Start the game!" : "Waiting for host..."}`,
-      );
-    });
-    newSocket.on("player-left", (player) =>
-      setError(`${player} left the room`),
-    );
-    newSocket.on("game-started", (data) => {
-      console.log("Game started:", data);
 
-      // Navigate ALL players to same room/game screen
+      setError(`Joined ${id}!`);
+    });
+
+    newSocket.on("player-left", (player) => {
+      setError(`${player} left the room`);
+    });
+
+    // ─────────────────────────────
+    // Game Start
+    // ─────────────────────────────
+
+    newSocket.on("game-started", (data) => {
+      console.log("🎮 Game started:", data);
+
       navigate(`/play/${data.roomId}`, {
         state: {
           players: data.players,
@@ -527,18 +577,41 @@ const Lobby = () => {
         },
       });
     });
-    newSocket.on("error", setError);
 
+    // ─────────────────────────────
+    // Error Handling
+    // ─────────────────────────────
+
+    newSocket.on("error", (err) => {
+      console.error("Socket error:", err);
+
+      setError(err);
+    });
+
+    // Save socket instance
     setSocket(newSocket);
 
-    // Fetch public rooms
+    // ─────────────────────────────
+    // Initial Public Rooms Fetch
+    // ─────────────────────────────
+
     axios
       .get(`${API_BASE}/rooms/`)
-      .then((res) => setPublicRooms(res.data))
+      .then((res) => {
+        setPublicRooms(res.data);
+      })
       .catch(console.error);
 
-    return () => newSocket.close();
-  }, [token, navigate, isHost]);
+    // ─────────────────────────────
+    // Cleanup
+    // ─────────────────────────────
+
+    return () => {
+      console.log("🧹 Cleaning socket");
+
+      newSocket.close();
+    };
+  }, [token, navigate]);
 
   const createRoom = () => {
     const id = Array.from({ length: 6 }, () =>
