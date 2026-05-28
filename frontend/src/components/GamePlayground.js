@@ -1312,9 +1312,9 @@ const GamePlayground = () => {
       );
     }
 
-    const cardCount = isMe
-      ? myHand?.length
-      : Math.max(1, 13 - (trickNumber - 1));
+    // const cardCount = isMe
+    //   ? myHand?.length
+    //   : Math.max(1, 13 - (trickNumber - 1));
 
     const cards = !isMe && (
       <></>
