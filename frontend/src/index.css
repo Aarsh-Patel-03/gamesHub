@@ -12,7 +12,8 @@ code {
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-.css-47ia2u-MuiContainer-root {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
+@media (min-width: 600px) {
+  .css-47ia2u-MuiContainer-root {
+    padding: 0 !important;
+  }
 }
