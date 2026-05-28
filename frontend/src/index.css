@@ -13,7 +13,10 @@ code {
 }
 
 @media (min-width: 600px) {
-  .css-47ia2u-MuiContainer-root {
+  .css-7aqqj0 {
     padding: 0 !important;
   }
+}
+.css-7aqqj0 {
+  padding: 0 !important;
 }
