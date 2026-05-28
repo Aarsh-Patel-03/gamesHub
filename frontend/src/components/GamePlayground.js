@@ -119,16 +119,16 @@ const styles = `
   /* TABLE SCENE */
   .table-scene {
     position: relative;
-    width: 70%;
-    height: 75vh;
-    margin: 10px auto 0;
+    width: 90%;
+    height: 50vh;
+    margin: 10px 0 0 0;
     flex-shrink: 0;
   }
 
   .table-rail {
     position: absolute;
     inset: 30px 20px;
-    border-radius: 20% / 50%;
+    border-radius: 55% / 55%;
     background: linear-gradient(160deg, #4a2c0a 0%, #2e1a06 40%, #1e1103 100%);
     box-shadow:
       0 0 0 3px #6b3d10,
@@ -140,7 +140,7 @@ const styles = `
   .table-felt {
     position: absolute;
     inset: 50px 38px;
-    border-radius: 20% / 50%;
+    border-radius: 55% / 55%;
     background:
       radial-gradient(ellipse 70% 55% at 48% 45%, #27ae60 0%, #1e8449 45%, #145a32 100%);
     box-shadow:
