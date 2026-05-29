@@ -119,7 +119,7 @@ const styles = `
   /* TABLE SCENE */
   .table-scene {
     position: relative;
-    width: 95%;
+    width: 92%;
     height: 33vh;
     margin: 10px 0 0 0;
     flex-shrink: 0;
@@ -127,7 +127,7 @@ const styles = `
 
   .table-rail {
     position: absolute;
-    inset: 30px 20px;
+    inset: 48px 36px;
     border-radius: 40% / 55%;
     background: linear-gradient(160deg, #4a2c0a 0%, #2e1a06 40%, #1e1103 100%);
     box-shadow:
@@ -433,7 +433,7 @@ const styles = `
     padding: 4px 10px 4px 4px;
     backdrop-filter: blur(8px);
     width: max-content;
-    max-width: 140px;
+    max-width: 110px;
     transition: border-color 0.25s, box-shadow 0.25s;
   }
 
