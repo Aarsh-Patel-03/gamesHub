@@ -415,12 +415,12 @@ const styles = `
     gap: 5px;
   }
 
-  .seat-bottom { bottom: -14px; left: 50%; transform: translateX(-50%); }
+  .seat-bottom { bottom: 3px; left: 50%; transform: translateX(-50%); }
   .seat-btm-l  { bottom: 42px; left: -10px; }
   .seat-btm-r  { bottom: 42px; right: -10px; align-items: flex-end; }
   .seat-top-l  { top: 42px; left: -10px; }
   .seat-top-r  { top: 42px; right: -10px; align-items: flex-end; }
-  .seat-top    { top: -14px; left: 50%; transform: translateX(-50%); }
+  .seat-top    { top: 3px; left: 50%; transform: translateX(-50%); }
 
   /* PLAYER CHIP */
   .player-card {
