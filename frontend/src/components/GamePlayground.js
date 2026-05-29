@@ -453,7 +453,7 @@ const styles = `
   .player-card.team-b { border-left: 3px solid #f87171; }
 
   .player-avatar-circle {
-    width: 36px; height: 36px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     background: linear-gradient(135deg, #374151, #1f2937);
     border: 2px solid rgba(255,255,255,0.14);
