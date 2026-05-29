@@ -420,7 +420,7 @@ const styles = `
   .seat-btm-r  { bottom: 42px; right: -10px; align-items: flex-end; }
   .seat-top-l  { top: 42px; left: -10px; }
   .seat-top-r  { top: 42px; right: -10px; align-items: flex-end; }
-  .seat-top    { top: 3px; left: 50%; transform: translateX(-50%); }
+  .seat-top    { top: 8px; left: 50%; transform: translateX(-50%); }
 
   /* PLAYER CHIP */
   .player-card {
@@ -522,7 +522,7 @@ const styles = `
   }
 
   .empty-avatar-circle {
-    width: 36px; height: 36px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     border: 1.5px dashed rgba(255,255,255,0.18);
     display: flex; align-items: center; justify-content: center;
