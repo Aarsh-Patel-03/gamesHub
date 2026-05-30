@@ -829,6 +829,9 @@ const styles = `
           overflow-y: scroll;
         }
     }
+    .game-nav{
+      padding : 0 0.5rem;
+    }
   }
 
 `;
@@ -1584,16 +1587,16 @@ const GamePlayground = () => {
 
       {/* NAV */}
       <nav className="game-nav">
-        <div className="nav-brand">🃏 Dehla Pakad</div>
+        <div className="nav-brand"> Dehla Pakad</div>
 
-        <div className="nav-center">
+        {/* <div className="nav-center">
           <div className="score-pill">
             <span className="score-a">Team A: {score.A} 🃏</span>
             <span className="score-sep">|</span>
             <span className="score-b">Team B: {score.B} 🃏</span>
           </div>
           <div className="trick-pill">Trick {trickNumber}/13</div>
-        </div>
+        </div> */}
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="room-pill">{roomId}</div>
