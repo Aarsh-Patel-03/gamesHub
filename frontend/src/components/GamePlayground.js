@@ -1589,15 +1589,6 @@ const GamePlayground = () => {
       <nav className="game-nav">
         <div className="nav-brand"> Dehla Pakad</div>
 
-        {/* <div className="nav-center">
-          <div className="score-pill">
-            <span className="score-a">Team A: {score.A} 🃏</span>
-            <span className="score-sep">|</span>
-            <span className="score-b">Team B: {score.B} 🃏</span>
-          </div>
-          <div className="trick-pill">Trick {trickNumber}/13</div>
-        </div> */}
-
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="room-pill">{roomId}</div>
           <div
@@ -1683,7 +1674,14 @@ const GamePlayground = () => {
               <div className="turn-badge">▶ YOUR TURN</div>
             )}
           </div>
-
+          <div className="nav-center">
+            <div className="score-pill">
+              <span className="score-a">Team A: {score.A} 🃏</span>
+              <span className="score-sep">|</span>
+              <span className="score-b">Team B: {score.B} 🃏</span>
+            </div>
+            <div className="trick-pill">Trick {trickNumber}/13</div>
+          </div>
           {/* Lead suit hint */}
           {isMyTurn && leadSuit && !isAnimating && (
             <div className="suit-hint">
