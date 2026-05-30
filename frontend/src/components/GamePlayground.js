@@ -810,6 +810,26 @@ const styles = `
   .team-tag.team-a { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.3); color: #93c5fd; }
   .team-tag.team-b { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: #fca5a5; }
 
+  @media screen and (orientation: landscape) and (max-height: 600px){
+    .game-root{
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 20px;
+      .table-scene{
+        width: 60vw;
+        height: 90vh;
+        margin-top: 0;
+        transform: translateY(-4vh);
+      }
+        .my-hand-area{
+          margin-top: 0;
+          width: 100%;
+          height: 80vh;
+          .hand-cards{
+          overflow-y: scroll;
+        }
+    }
+  }
 
 `;
 
