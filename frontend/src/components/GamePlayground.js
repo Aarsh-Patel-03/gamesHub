@@ -1741,7 +1741,7 @@ const GamePlayground = () => {
           )}
 
           {/* Team info */}
-          {teams.A.length > 0 && (
+          {/* {teams.A.length > 0 && (
             <div className="team-panel">
               <div className="team-tag team-a">
                 Team A: {teams.A.join(" & ")}
@@ -1750,7 +1750,7 @@ const GamePlayground = () => {
                 Team B: {teams.B.join(" & ")}
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>
