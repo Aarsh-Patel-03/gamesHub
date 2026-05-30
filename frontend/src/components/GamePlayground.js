@@ -55,7 +55,8 @@ const styles = `
   .nav-center {
     display: flex;
     align-items: center;
-    gap: 16px;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .score-pill {
