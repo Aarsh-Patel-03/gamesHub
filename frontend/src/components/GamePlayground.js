@@ -238,50 +238,30 @@ const styles = `
     pointer-events: none;
   }
 
-  /* ══════════════════════════════════════════
-     DEALING LAYER — cards fly from deck to seats
-     ══════════════════════════════════════════ */
+  /* ── DEALING LAYER ── */
+  /* Lives inside .table-scene (not .table-felt) so cards aren't clipped */
   .dealing-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 40;
-    /* overflow: visible so cards can fly outside the table-scene bounds */
     overflow: visible;
   }
 
-  /* The center deck stack shown before/during dealing */
-  .deck-center {
-    position: absolute;
-    z-index: 45;
-    pointer-events: none;
-  }
-
-  /* Each card in the center deck stack */
-  .deck-center-card {
-    position: absolute;
-    width: 42px;
-    height: 60px;
-    border-radius: 6px;
-    background: linear-gradient(155deg, #1e3a6e 0%, #0d1f40 60%, #07132a 100%);
-    border: 1px solid rgba(100,160,255,0.35);
-    box-shadow: 2px 3px 10px rgba(0,0,0,0.7);
-    transition: opacity 0.15s ease;
-  }
-
-  /* Flying deal card — absolutely positioned, GPU-composited */
+  /* Each deal-card is rendered at its FINAL seat position from the start.
+     It begins scaled/faded via inline style, then CSS transition moves it. */
   .deal-card {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 42px;
-    height: 60px;
-    border-radius: 6px;
+    width: 36px;
+    height: 52px;
+    border-radius: 5px;
     background: linear-gradient(155deg, #1e3a6e 0%, #0d1f40 60%, #07132a 100%);
     border: 1px solid rgba(100,160,255,0.3);
     box-shadow: 2px 3px 10px rgba(0,0,0,0.6);
+    /* GPU-composited transition for smooth animation */
+    transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                opacity   0.3s ease;
     will-change: transform, opacity;
-    /* transition controlled per-card via inline style */
   }
 
   /* ── ALL-PLAYERS-JOINED OVERLAY ── */
@@ -425,7 +405,7 @@ const styles = `
   }
 
   .banner-winner { font-size: 1rem; font-weight: 700; color: #ffd700; letter-spacing: 1px; }
-  .banner-sub    { font-size: 0.65rem; color: rgba(255,200,0,0.55); letter-spacing: 2px; margin-top: 2px; }
+  .banner-sub    { font-size: 0.65rem; color: rgba(255,255,255,0.55); letter-spacing: 2px; margin-top: 2px; }
 
   /* SEATS */
   .seat {
@@ -635,6 +615,22 @@ const styles = `
     pointer-events: none;
   }
 
+  /* Ten highlight */
+  .my-card.is-ten::before {
+    content: '10';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.4rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #f59e0b;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .my-card.is-ten {
     box-shadow: 0 5px 16px rgba(0,0,0,0.55), 0 0 0 1.5px rgba(245,158,11,0.45);
   }
@@ -815,96 +811,30 @@ const styles = `
   .team-tag.team-a { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.3); color: #93c5fd; }
   .team-tag.team-b { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: #fca5a5; }
 
-  /* SHUFFLE OVERLAY */
-  .shuffle-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 300;
-  }
-
-  .deck-stack {
-    position: relative;
-    width: 80px;
-    height: 110px;
-  }
-
-  .deck-card {
-    position: absolute;
-    inset: 0;
-    border-radius: 8px;
-    background: linear-gradient(155deg, #1e3a6e 0%, #0d1f40 60%, #07132a 100%);
-    border: 1px solid rgba(100,160,255,0.4);
-  }
-
-  .deck-card:nth-child(1) { animation: shuffle1 1.5s ease-in-out infinite; }
-  .deck-card:nth-child(2) { animation: shuffle2 1.5s ease-in-out infinite; }
-  .deck-card:nth-child(3) { animation: shuffle3 1.5s ease-in-out infinite; }
-
-  @keyframes shuffle1 {
-    0%,100% { transform: translate(0,0) rotate(0); }
-    50%      { transform: translate(-60px,-10px) rotate(-20deg); }
-  }
-  @keyframes shuffle2 {
-    0%,100% { transform: translate(0,0) rotate(0); }
-    50%      { transform: translate(60px,-10px) rotate(20deg); }
-  }
-  @keyframes shuffle3 {
-    0%,100% { transform: translate(0,0) rotate(0); }
-    50%      { transform: translate(0,-30px) rotate(8deg); }
-  }
-
-  .shuffle-text {
-    position: absolute;
-    margin-top: 220px;
-    font-family: 'Orbitron';
-    letter-spacing: 5px;
-    color: #00ff88;
-    font-size: 1rem;
-    animation: blink 1s infinite;
-  }
-
-  /* DEALING LABEL */
-  .dealing-label {
-    position: absolute;
-    bottom: -28px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.42rem;
-    letter-spacing: 4px;
-    color: rgba(0,255,136,0.55);
-    white-space: nowrap;
-    animation: blink 1s ease-in-out infinite;
-  }
-
   @media screen and (orientation: landscape) and (max-height: 600px){
     .game-root{
       flex-direction: row;
       align-items: flex-start;
       gap: 20px;
-    }
-    .table-scene{
-      width: 60vw;
-      height: 90vh;
-      margin-top: 0;
-      transform: translateY(-4vh);
-    }
-    .my-hand-area{
-      margin-top: 0;
-      width: 100%;
-      height: 80vh;
-    }
-    .hand-cards{
-      overflow-y: scroll;
+      .table-scene{
+        width: 60vw;
+        height: 90vh;
+        margin-top: 0;
+        transform: translateY(-4vh);
+      }
+        .my-hand-area{
+          margin-top: 0;
+          width: 100%;
+          height: 80vh;
+          .hand-cards{
+          overflow-y: scroll;
+        }
     }
     .game-nav{
-      padding: 0 0.5rem;
+      padding : 0 0.5rem;
     }
   }
+
 `;
 
 // ════════════════════════════════════════════
@@ -932,14 +862,75 @@ const TRICK_SLOT_LABELS = ["You", "Left", "Right", "Top"];
 const TOP_SEATS = new Set(["seat-top-l", "seat-top-r", "seat-top"]);
 const SIDE_BOT_SEATS = new Set(["seat-btm-l", "seat-btm-r"]);
 
-// How many stacked layers to show in the center deck visual
-const DECK_VISUAL_LAYERS = 6;
-// Each card's flight duration in ms
-const CARD_FLIGHT_MS = 380;
-// Gap between successive card deals in ms
-const CARD_STAGGER_MS = 80;
-
 // ════════════════════════════════════════════
+//  CARD COMPONENT
+// ════════════════════════════════════════════
+
+// const CardFace = ({ card, small = false }) => {
+//   if (!card) return null;
+//   const sc = getSuitClass(card.suit);
+//   const sz = small
+//     ? { rank: "0.72rem", suit: "0.58rem", center: "1.1rem" }
+//     : { rank: "0.85rem", suit: "0.65rem", center: "1.4rem" };
+
+//   return (
+//     <>
+//       <div className="card-corner">
+//         <span className={`c-rank ${sc}`} style={{ fontSize: sz.rank }}>
+//           {card.rank}
+//         </span>
+//         <span className={`c-suit ${sc}`} style={{ fontSize: sz.suit }}>
+//           {card.suit}
+//         </span>
+//       </div>
+//       <span className={`c-center ${sc}`} style={{ fontSize: sz.center }}>
+//         {card.suit}
+//       </span>
+//       <div className="card-corner btm-right">
+//         <span className={`c-rank ${sc}`} style={{ fontSize: sz.rank }}>
+//           {card.rank}
+//         </span>
+//         <span className={`c-suit ${sc}`} style={{ fontSize: sz.suit }}>
+//           {card.suit}
+//         </span>
+//       </div>
+//     </>
+//   );
+// };
+
+// ==========================================
+//  COUNTDOWN OVERLAY
+// ==========================================
+
+const CIRCUMFERENCE = 2 * Math.PI * 46; // r=46
+
+const CountdownOverlay = ({ value }) => {
+  // stroke-dashoffset goes from 0 (full ring) down to CIRCUMFERENCE (empty)
+  const offset = CIRCUMFERENCE - (value / 3) * CIRCUMFERENCE;
+  return (
+    <div className="countdown-overlay">
+      <div className="countdown-ring">
+        <svg viewBox="0 0 100 100" width="110" height="110">
+          <circle className="countdown-ring-track" cx="50" cy="50" r="46" />
+          <circle
+            className="countdown-ring-fill"
+            cx="50"
+            cy="50"
+            r="46"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={offset}
+          />
+        </svg>
+        <div className="countdown-number" key={value}>
+          {value}
+        </div>
+      </div>
+      <div className="countdown-label">Game starting</div>
+    </div>
+  );
+};
+
+// ==========================================
 //  GAME OVER SCREEN
 // ════════════════════════════════════════════
 
@@ -955,6 +946,7 @@ const GameOverScreen = ({ result, onBack }) => {
         <div className="go-subtitle">
           Game Complete · {result.tensA + result.tensB} Tens Played
         </div>
+
         <div className="go-scores">
           <div
             className={`go-score-box ${result.winner === "A" ? "winner-box" : ""}`}
@@ -975,6 +967,7 @@ const GameOverScreen = ({ result, onBack }) => {
             <div className="go-score-players">{result.teamB.join(" & ")}</div>
           </div>
         </div>
+
         <button className="go-btn" onClick={onBack}>
           ← Back to Lobby
         </button>
@@ -982,17 +975,6 @@ const GameOverScreen = ({ result, onBack }) => {
     </div>
   );
 };
-
-const ShuffleAnimation = () => (
-  <div className="shuffle-overlay">
-    <div className="deck-stack">
-      <div className="deck-card" />
-      <div className="deck-card" />
-      <div className="deck-card" />
-    </div>
-    <div className="shuffle-text">SHUFFLING CARDS...</div>
-  </div>
-);
 
 // ════════════════════════════════════════════
 //  MAIN COMPONENT
@@ -1008,40 +990,32 @@ const GamePlayground = () => {
   const [teams, setTeams] = useState({ A: [], B: [] });
   const [currentTurn, setCurrentTurn] = useState("");
   const [myHand, setMyHand] = useState([]);
-  const [validCardIds, setValidCardIds] = useState(null);
+  const [validCardIds, setValidCardIds] = useState(null); // null = all valid
   const [selectedCard, setSelectedCard] = useState(null);
   const [connected, setConnected] = useState(false);
-  const [currentTrick, setCurrentTrick] = useState([]);
+  const [currentTrick, setCurrentTrick] = useState([]); // [{player, card}]
   const [leadSuit, setLeadSuit] = useState(null);
   const [trickNumber, setTrickNumber] = useState(1);
   const [score, setScore] = useState({ A: 0, B: 0 });
-  const [trickWinner, setTrickWinner] = useState(null);
+  const [trickWinner, setTrickWinner] = useState(null); // shown briefly
   const [gameOver, setGameOver] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [isShuffling, setIsShuffling] = useState(false);
-
-  // ── Dealing state ──
-  // dealingCards: array of { id, targetX, targetY, delay, landed }
-  // deckCardsLeft: how many cards remain visually in the center deck
   const [isDealing, setIsDealing] = useState(false);
   const [dealingCards, setDealingCards] = useState([]);
-  const [deckCardsLeft, setDeckCardsLeft] = useState(52);
-  // center deck position (set once layout is known)
-  const [deckPos, setDeckPos] = useState({ x: 0, y: 0 });
-
+  // const [countdown, setCountdown] = useState(null); // 3 | 2 | 1 | null
   const countdown = null;
   const [pendingHand, setPendingHand] = useState(null);
   const pendingHandRef = useRef(null);
-  const [joinCountdown] = useState(null);
-
+  // All-players-joined phase: full-screen overlay with countdown
+  const [joinCountdown, setJoinCountdown] = useState(null); // 5..1 | null
+  const [joinPlayers, setJoinPlayers] = useState([]);
   const seatRefs = useRef({});
   const tableRef = useRef(null);
   const trickWinnerTimer = useRef(null);
+  const countdownRef = useRef(null);
+  const joinCountdownRef = useRef(null);
   const gameStartedRef = useRef(false);
   const joinDoneRef = useRef(false);
-  // track individual deal-card landing timers for cleanup
-  const dealTimers = useRef([]);
-
   const token = localStorage.getItem("token");
   const myUsername = token
     ? JSON.parse(atob(token.split(".")[1])).username
@@ -1054,108 +1028,60 @@ const GamePlayground = () => {
   const rotated = rotatePlayers(players, myUsername);
   const isMyTurn = currentTurn === myUsername;
 
+  // Keep a ref to rotated so the deal-hand socket handler (closure) can read
+  // the LIVE player list without being stale.
   const rotatedRef = useRef(rotated);
   useEffect(() => {
     rotatedRef.current = rotated;
   }, [rotated]);
 
+  // Keep pendingHandRef in sync so startDealingAnimation never reads a stale closure
   useEffect(() => {
     pendingHandRef.current = pendingHand;
   }, [pendingHand]);
 
+  // Show error toast for 2.5s
   const showError = useCallback((msg) => {
     setErrorMsg(msg);
     setTimeout(() => setErrorMsg(""), 2500);
   }, []);
 
-  // ══════════════════════════════════════════
-  //  NEW: startDealingAnimation
-  //
-  //  Flow:
-  //  1. Compute center of table → that's the deck position.
-  //  2. Mount the deck visual (deckCardsLeft = 52).
-  //  3. For each of 52 cards (round-robin across 4 players):
-  //     a. After `delay` ms, create a flying card at deck center.
-  //     b. One rAF later flip its transform to the seat position
-  //        (CSS transition does the smooth flight).
-  //     c. Decrement deckCardsLeft so the deck visually shrinks.
-  //     d. After flight completes, remove the card from DOM.
-  //  4. After all 52 flights finish + buffer, reveal the real hand.
-  // ══════════════════════════════════════════
   const startDealingAnimation = useCallback(() => {
     if (!tableRef.current) return;
 
     const tableRect = tableRef.current.getBoundingClientRect();
-
-    // Center of table-scene in local coords
-    const cx = tableRect.width / 2 - 21; // half of card width (42px)
-    const cy = tableRect.height / 2 - 30; // half of card height (60px)
-
-    setDeckPos({ x: cx, y: cy });
-    setDeckCardsLeft(52);
-    setIsDealing(true);
-    setDealingCards([]);
-
+    const cards = [];
     const liveRotated = rotatedRef.current;
-    // Clear any leftover timers from a previous deal
-    dealTimers.current.forEach(clearTimeout);
-    dealTimers.current = [];
 
     for (let i = 0; i < 52; i++) {
-      const player = liveRotated[i % Math.max(liveRotated.length, 1)];
-      const delay = i * CARD_STAGGER_MS;
+      const player = liveRotated[i % 4];
+      const seatEl = seatRefs.current[player];
 
-      const t = setTimeout(() => {
-        const seatEl = seatRefs.current[player];
-        if (!seatEl) return;
+      if (!seatEl) continue;
 
-        const seatRect = seatEl.getBoundingClientRect();
-        // Target: center of the seat element
-        const targetX =
-          seatRect.left + seatRect.width / 2 - tableRect.left - 21;
-        const targetY = seatRect.top + seatRect.height / 2 - tableRect.top - 30;
+      const rect = seatEl.getBoundingClientRect();
 
-        const cardId = `deal-${i}`;
-
-        // 1) Add card at deck position (no transition yet)
-        setDealingCards((prev) => [
-          ...prev,
-          { id: cardId, x: cx, y: cy, targetX, targetY, flying: false },
-        ]);
-
-        // 2) Next paint: flip flying=true → CSS transition fires
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setDealingCards((prev) =>
-              prev.map((c) => (c.id === cardId ? { ...c, flying: true } : c)),
-            );
-          });
-        });
-
-        // 3) Shrink the deck visual
-        setDeckCardsLeft((prev) => Math.max(0, prev - 1));
-
-        // 4) Remove the flying card after it lands
-        const removeT = setTimeout(() => {
-          setDealingCards((prev) => prev.filter((c) => c.id !== cardId));
-        }, CARD_FLIGHT_MS + 50);
-        dealTimers.current.push(removeT);
-      }, delay);
-
-      dealTimers.current.push(t);
+      cards.push({
+        id: i,
+        x: rect.left + rect.width / 2 - tableRect.left,
+        y: rect.top + rect.height / 2 - tableRect.top,
+        delay: i * 60,
+      });
     }
 
-    // After all cards have flown + a small buffer, reveal the real hand
-    const totalDealMs = 52 * CARD_STAGGER_MS + CARD_FLIGHT_MS + 600;
-    const doneT = setTimeout(() => {
-      setMyHand(pendingHandRef.current || []);
-      setIsDealing(false);
-      setDealingCards([]);
-      setDeckCardsLeft(0);
-      setPendingHand(null);
-    }, totalDealMs);
-    dealTimers.current.push(doneT);
-  }, []); // no deps — reads live refs inside
+    setIsDealing(true);
+    setDealingCards(cards);
+
+    setTimeout(
+      () => {
+        setMyHand(pendingHandRef.current);
+        setIsDealing(false);
+        setDealingCards([]);
+        setPendingHand(null);
+      },
+      52 * 60 + 500,
+    );
+  }, []);
 
   useEffect(() => {
     if (!token) return navigate("/");
@@ -1172,27 +1098,114 @@ const GamePlayground = () => {
 
     s.on("disconnect", () => setConnected(false));
 
+    // s.on("room-update", (d) => setPlayers(d.players || []));
+
     s.on("game-started", (data) => {
       gameStartedRef.current = true;
       setPlayers(data.players);
     });
 
     s.on("room-update", (d) => {
-      if (!gameStartedRef.current) setPlayers(d.players || []);
+      if (!gameStartedRef.current) {
+        setPlayers(d.players || []);
+      }
     });
+    // Receive private hand — 3-2-1 countdown then CSS-transition card deal
+    // s.on("deal-hand", (hand) => {
+    //   setSelectedCard(null);
+    //   setPendingHand(hand);
 
+    //   // ── Phase A: 3-2-1 countdown overlay on the table ──
+    //   setCountdown(3);
+    //   const t1 = setTimeout(() => setCountdown(2), 1000);
+    //   const t2 = setTimeout(() => setCountdown(1), 2000);
+
+    //   // ── Phase B: start dealing after countdown ──
+    //   const t3 = setTimeout(() => {
+    //     setCountdown(null);
+
+    //     if (!tableRef.current) return;
+    //     const tableRect = tableRef.current.getBoundingClientRect();
+    //     const cx = tableRect.width / 2 - 18; // center x minus half-card
+    //     const cy = tableRect.height / 2 - 26; // center y minus half-card
+
+    //     // rotatedRef.current is always the live player array (no stale closure)
+    //     const liveRotated = rotatedRef.current;
+    //     const rotations = Array.from(
+    //       { length: 52 },
+    //       (_, i) => ((i * 137.5) % 30) - 15,
+    //     );
+
+    //     const cards = [];
+    //     for (let i = 0; i < 52; i++) {
+    //       const player = liveRotated[i % Math.max(liveRotated.length, 1)];
+    //       const seatEl = seatRefs.current[player];
+    //       if (!seatEl) continue;
+
+    //       const seatRect = seatEl.getBoundingClientRect();
+    //       const finalX =
+    //         seatRect.left + seatRect.width / 2 - tableRect.left - 18;
+    //       const finalY =
+    //         seatRect.top + seatRect.height / 2 - tableRect.top - 26;
+
+    //       cards.push({
+    //         id: i,
+    //         startX: cx,
+    //         startY: cy,
+    //         finalX,
+    //         finalY,
+    //         rot: rotations[i],
+    //         delay: i * 70,
+    //         animate: false, // starts at center, not yet transitioned
+    //       });
+    //     }
+
+    //     // 1) Mount cards at their START position (center of table)
+    //     setIsDealing(true);
+    //     setDealingCards(cards);
+
+    //     // 2) After two rAF ticks the DOM has painted the start state.
+    //     //    Flip animate=true so the CSS transition fires for each card.
+    //     requestAnimationFrame(() => {
+    //       requestAnimationFrame(() => {
+    //         setDealingCards((prev) =>
+    //           prev.map((c) => ({ ...c, animate: true })),
+    //         );
+    //       });
+    //     });
+    //   }, 3000);
+
+    //   // ── Phase C: show real hand after all cards have landed ──
+    //   const STAGGER_TOTAL = 52 * 70; // last card starts flying at this ms
+    //   const FLIGHT_MS = 500; // transition duration
+    //   const TOTAL = 3000 + STAGGER_TOTAL + FLIGHT_MS + 400;
+
+    //   const t4 = setTimeout(() => {
+    //     setMyHand(hand);
+    //     setIsDealing(false);
+    //     setDealingCards([]);
+    //     setPendingHand(null);
+    //   }, TOTAL);
+
+    //   countdownRef.current = [t1, t2, t3, t4];
+    // });
     s.on("deal-hand", (hand) => {
       setPendingHand(hand);
-      pendingHandRef.current = hand;
-      if (joinDoneRef.current) startDealingAnimation();
+      pendingHandRef.current = hand; // keep ref in sync immediately
+      // Only animate if the join countdown has already finished
+      if (joinDoneRef.current) {
+        startDealingAnimation();
+      }
     });
 
+    // Live hand + valid-card updates after each play
     s.on("hand-update", ({ hand, validCards }) => {
       setMyHand(hand);
       setValidCardIds(validCards ?? null);
       setSelectedCard(null);
     });
 
+    // Trick state from server (lead suit, current trick, whose turn, score)
     s.on("trick-update", (data) => {
       setCurrentTrick(data.currentTrick || []);
       setLeadSuit(data.leadSuit);
@@ -1203,7 +1216,8 @@ const GamePlayground = () => {
 
     s.on("turn-update", setCurrentTurn);
 
-    s.on("card-played", ({ player, card }) => {
+    // A card was played (live update)
+    s.on("card-played", ({ player, card, trickPosition }) => {
       setCurrentTrick((prev) => {
         const exists = prev.some((t) => t.player === player);
         if (exists) return prev;
@@ -1211,9 +1225,12 @@ const GamePlayground = () => {
       });
     });
 
+    // Trick resolved
     s.on("trick-result", (data) => {
       setScore({ A: data.tensA, B: data.tensB });
       setTrickWinner({ name: data.winner, team: data.winnerTeam });
+
+      // Clear winner banner after 1.8s
       if (trickWinnerTimer.current) clearTimeout(trickWinnerTimer.current);
       trickWinnerTimer.current = setTimeout(() => {
         setTrickWinner(null);
@@ -1222,32 +1239,62 @@ const GamePlayground = () => {
       }, 1800);
     });
 
+    // game-started fires in two cases:
+    //   1. Lobby → navigation trigger (sets players/teams)
+    //   2. GamePlayground re-join re-sync (same, just refresh state)
     s.on("game-started", (data) => {
       if (data.teams) setTeams(data.teams);
       if (data.players) setPlayers(data.players);
     });
 
-    s.on("all-players-joined", () => {
-      setIsShuffling(true);
-      setTimeout(() => {
-        setIsShuffling(false);
-        joinDoneRef.current = true;
-        if (pendingHandRef.current) startDealingAnimation();
-      }, 1800);
+    // All players have joined — show full-screen countdown before cards are dealt
+    s.on("all-players-joined", ({ players: joinedPlayers, dealDelayMs }) => {
+      setJoinPlayers(joinedPlayers || []);
+      joinDoneRef.current = false; // reset
+      const totalSecs = Math.round((dealDelayMs || 5000) / 1000);
+      setJoinCountdown(totalSecs);
+      const timers = [];
+      for (let i = 1; i < totalSecs; i++) {
+        timers.push(
+          setTimeout(() => setJoinCountdown(totalSecs - i), i * 1000),
+        );
+      }
+      timers.push(
+        setTimeout(() => {
+          setJoinCountdown(null);
+          setJoinPlayers([]);
+          joinDoneRef.current = true;
+          // Only animate if deal-hand already arrived
+          if (pendingHandRef.current) {
+            startDealingAnimation();
+          }
+        }, totalSecs * 1000),
+      );
+      joinCountdownRef.current = timers;
     });
 
     s.on("invalid-move", ({ reason }) => showError(reason));
     s.on("error", showError);
-    s.on("game-over", setGameOver);
-    s.on("player-disconnected", ({ username }) =>
-      showError(`${username} disconnected`),
-    );
+
+    s.on("game-over", (result) => {
+      setGameOver(result);
+    });
+
+    s.on("player-disconnected", ({ username }) => {
+      showError(`${username} disconnected`);
+    });
 
     setSocket(s);
-
+    const trickTimer = trickWinnerTimer.current;
+    const countdownTimers = countdownRef.current;
+    const joinTimers = joinCountdownRef.current;
     return () => {
-      if (trickWinnerTimer.current) clearTimeout(trickWinnerTimer.current);
-      dealTimers.current.forEach(clearTimeout);
+      if (trickTimer) clearTimeout(trickTimer);
+
+      if (countdownTimers) countdownTimers.forEach((t) => clearTimeout(t));
+
+      if (joinTimers) joinTimers.forEach((t) => clearTimeout(t));
+
       s.close();
     };
   }, [roomId, token, navigate, showError, startDealingAnimation]);
@@ -1263,8 +1310,9 @@ const GamePlayground = () => {
   const handleCardClick = (card) => {
     if (isAnimating) return;
     if (!isMyTurn) return showError("It's not your turn!");
-    if (validCardIds && !validCardIds.includes(card.id))
+    if (validCardIds && !validCardIds.includes(card.id)) {
       return showError(`Must follow suit: ${leadSuit}`);
+    }
     setSelectedCard((prev) => (prev?.id === card.id ? null : card));
   };
 
@@ -1272,6 +1320,7 @@ const GamePlayground = () => {
   const renderSeat = (seatClass, playerName) => {
     const isMe = playerName === myUsername;
     const isTurn = playerName === currentTurn;
+    // const count = myHand?.length || 13; // approximate for opponents
     const isTop = TOP_SEATS.has(seatClass);
     const isSide = SIDE_BOT_SEATS.has(seatClass);
     const pTeam = teams.A.includes(playerName) ? "A" : "B";
@@ -1287,7 +1336,18 @@ const GamePlayground = () => {
       );
     }
 
-    const cards = !isMe && <></>;
+    // const cardCount = isMe
+    //   ? myHand?.length
+    //   : Math.max(1, 13 - (trickNumber - 1));
+
+    const cards = !isMe && (
+      <></>
+      // <div className="opp-hand">
+      //   {Array.from({ length: Math.min(cardCount, 8) }).map((_, i) => (
+      //     <div className="opp-hand-card" key={i} />
+      //   ))}
+      // </div>
+    );
 
     const chip = (
       <div
@@ -1321,6 +1381,8 @@ const GamePlayground = () => {
   };
 
   // ── Trick area ──
+  // Map: slot index → rotated player index
+  // rotated[0]=me(bottom), rotated[1]=left, rotated[2]=right, rotated[3]=top(4-player)
   const trickCardMap = {};
   currentTrick.forEach(({ player, card }) => {
     const idx = rotated.indexOf(player);
@@ -1394,6 +1456,7 @@ const GamePlayground = () => {
     const isSelected = selectedCard?.id === card.id;
     const isTen = card.rank === "10";
     const sc = getSuitClass(card.suit);
+
     return (
       <div
         key={card.id || i}
@@ -1419,9 +1482,6 @@ const GamePlayground = () => {
     );
   };
 
-  // How many layers to show in the static center deck
-  const deckLayersToShow = Math.ceil((deckCardsLeft / 52) * DECK_VISUAL_LAYERS);
-
   // ════════════════════════════════════════════
   //  RENDER
   // ════════════════════════════════════════════
@@ -1429,7 +1489,76 @@ const GamePlayground = () => {
     <>
       <style>{styles}</style>
 
-      {isShuffling && <ShuffleAnimation />}
+      {/* Full-screen overlay: shown when all players join, counts down to deal */}
+      {joinCountdown !== null && (
+        <div className="join-countdown-overlay">
+          <div className="join-countdown-title">
+            ✅ All Players Joined!
+            <br />
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "rgba(0,255,136,0.5)",
+                letterSpacing: 3,
+              }}
+            >
+              Cards deal in {joinCountdown}s
+            </span>
+          </div>
+          <div className="join-countdown-players">
+            {joinPlayers.map((p) => (
+              <div className="join-player-chip" key={p}>
+                👤 {p}
+              </div>
+            ))}
+          </div>
+          <div
+            className="countdown-ring"
+            style={{ width: 130, height: 130, position: "relative" }}
+          >
+            <svg
+              viewBox="0 0 100 100"
+              width="130"
+              height="130"
+              style={{
+                position: "absolute",
+                inset: 0,
+                transform: "rotate(-90deg)",
+              }}
+            >
+              <circle className="countdown-ring-track" cx="50" cy="50" r="46" />
+              <circle
+                className="countdown-ring-fill"
+                cx="50"
+                cy="50"
+                r="46"
+                strokeDasharray={2 * Math.PI * 46}
+                strokeDashoffset={(1 - joinCountdown / 5) * 2 * Math.PI * 46}
+                style={{
+                  stroke: "#00ff88",
+                  filter: "drop-shadow(0 0 8px rgba(0,255,136,0.8))",
+                }}
+              />
+            </svg>
+            <div
+              className="countdown-number"
+              key={joinCountdown}
+              style={{
+                color: "#00ff88",
+                textShadow: "0 0 24px rgba(0,255,136,0.9)",
+              }}
+            >
+              {joinCountdown}
+            </div>
+          </div>
+          <div
+            className="countdown-label"
+            style={{ marginTop: 16, color: "rgba(0,255,136,0.5)" }}
+          >
+            DEALING CARDS SOON
+          </div>
+        </div>
+      )}
 
       {gameOver && (
         <GameOverScreen result={gameOver} onBack={() => navigate("/lobby")} />
@@ -1437,6 +1566,7 @@ const GamePlayground = () => {
 
       {errorMsg && <div className="error-toast">⚠ {errorMsg}</div>}
 
+      {/* Trick winner banner */}
       {trickWinner && (
         <div
           style={{
@@ -1458,7 +1588,8 @@ const GamePlayground = () => {
 
       {/* NAV */}
       <nav className="game-nav">
-        <div className="nav-brand">Dehla Pakad</div>
+        <div className="nav-brand"> Dehla Pakad</div>
+
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="room-pill">{roomId}</div>
           <div
@@ -1474,56 +1605,48 @@ const GamePlayground = () => {
         {/* TABLE */}
         <div className="table-scene" ref={tableRef}>
           <div className="table-rail" />
-          <div className="table-felt">
-            {/* Only show trick area when not dealing */}
-            {!isDealing && renderTrickArea()}
-          </div>
+          <div className="table-felt">{renderTrickArea()}</div>
 
-          {/* ── CENTER DECK (visible during dealing) ── */}
-          {isDealing && deckLayersToShow > 0 && (
+          {/* Countdown overlay - rendered inside table-felt or over the table */}
+          {countdown !== null && (
             <div
-              className="deck-center"
               style={{
-                left: deckPos.x,
-                top: deckPos.y,
-                width: 42,
-                height: 60,
+                position: "absolute",
+                inset: 0,
+                zIndex: 50,
+                pointerEvents: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {Array.from({ length: deckLayersToShow }).map((_, layerIdx) => (
-                <div
-                  key={layerIdx}
-                  className="deck-center-card"
-                  style={{
-                    transform: `translate(${-layerIdx * 0.8}px, ${-layerIdx * 1.2}px)`,
-                    zIndex: layerIdx,
-                    opacity: 0.6 + (layerIdx / DECK_VISUAL_LAYERS) * 0.4,
-                  }}
-                />
-              ))}
-              <div className="dealing-label">DEALING</div>
+              <CountdownOverlay value={countdown} />
             </div>
           )}
 
-          {/* ── FLYING DEAL CARDS ── */}
+          {/* Dealing animation — cards slide from center to each seat via CSS transition */}
           {isDealing && (
             <div className="dealing-layer">
-              {dealingCards.map((card) => (
-                <div
-                  key={card.id}
-                  className="deal-card"
-                  style={{
-                    transform: card.flying
-                      ? `translate(${card.targetX}px, ${card.targetY}px) scale(1)`
-                      : `translate(${card.x}px, ${card.y}px) scale(0.6)`,
-                    opacity: card.flying ? 1 : 0,
-                    transition: card.flying
-                      ? `transform ${CARD_FLIGHT_MS}ms cubic-bezier(0.25,0.46,0.45,0.94),
-                         opacity 80ms ease`
-                      : "none",
-                  }}
-                />
-              ))}
+              {dealingCards.map((card) => {
+                const x = card.animate ? card.finalX : card.startX;
+                const y = card.animate ? card.finalY : card.startY;
+                const scale = card.animate ? 1 : 0.4;
+                const opacity = card.animate ? 1 : 0;
+                const rotate = card.animate ? card.rot : 0;
+                return (
+                  <div
+                    key={card.id}
+                    className="deal-card"
+                    style={{
+                      top: 0,
+                      left: 0,
+                      transitionDelay: `${card.delay}ms`,
+                      transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotate}deg)`,
+                      opacity,
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -1536,7 +1659,11 @@ const GamePlayground = () => {
           <div className="hand-header">
             <div className="hand-title">
               {isAnimating
-                ? "Dealing cards..."
+                ? joinCountdown !== null
+                  ? "All players joined — get ready!"
+                  : countdown !== null
+                    ? "Get ready..."
+                    : "Dealing cards..."
                 : `Your Hand (${myHand?.length} cards)`}
               {myTeam && !isAnimating && (
                 <span style={{ marginLeft: 8, opacity: 0.5 }}>
@@ -1548,7 +1675,6 @@ const GamePlayground = () => {
               <div className="turn-badge">▶ YOUR TURN</div>
             )}
           </div>
-
           <div className="nav-center">
             <div className="score-pill">
               <span className="score-a">Team A: {score.A} 🃏</span>
@@ -1557,7 +1683,7 @@ const GamePlayground = () => {
             </div>
             <div className="trick-pill">Trick {trickNumber}/13</div>
           </div>
-
+          {/* Lead suit hint */}
           {isMyTurn && leadSuit && !isAnimating && (
             <div className="suit-hint">
               Lead Suit: {leadSuit} — Follow if you can!
@@ -1566,6 +1692,7 @@ const GamePlayground = () => {
 
           <div className="hand-cards">
             {isAnimating ? (
+              /* Show face-down placeholders while dealing */
               Array.from({ length: 13 }).map((_, i) => (
                 <div
                   key={i}
@@ -1577,7 +1704,8 @@ const GamePlayground = () => {
                       "linear-gradient(155deg,#1e3a6e 0%,#0d1f40 60%,#07132a 100%)",
                     border: "1px solid rgba(100,160,255,0.22)",
                     boxShadow: "0 5px 16px rgba(0,0,0,0.55)",
-                    opacity: 0.2,
+                    opacity: countdown !== null ? 0.15 : 0.5 + (i / 13) * 0.4,
+                    transition: `opacity ${i * 80}ms ease`,
                     flexShrink: 0,
                   }}
                 />
@@ -1613,6 +1741,18 @@ const GamePlayground = () => {
               </button>
             </div>
           )}
+
+          {/* Team info */}
+          {/* {teams.A.length > 0 && (
+            <div className="team-panel">
+              <div className="team-tag team-a">
+                Team A: {teams.A.join(" & ")}
+              </div>
+              <div className="team-tag team-b">
+                Team B: {teams.B.join(" & ")}
+              </div>
+            </div>
+          )} */}
         </div>
       </div>
     </>
