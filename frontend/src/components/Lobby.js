@@ -648,17 +648,16 @@ const Lobby = () => {
 
   const statusClass = isSocketReady ? "live" : "connecting";
   const statusLabel = isSocketReady
-    ? `LIVE · ${socket?.id?.slice(-4) || ""}`
-    : "CONNECTING";
+    ? "LIVE"
+    : // ? `LIVE · ${socket?.id?.slice(-4) || ""}`
+      "CONNECTING";
 
   return (
     <>
       <style>{styles}</style>
       <div className="lobby-root">
         <nav className="nav">
-          <div className="nav-brand">
-            <span>🃏</span> CardArena
-          </div>
+          <div className="nav-brand">CardArena</div>
           <div className="nav-right">
             <div className={`status-dot ${statusClass}`}>
               <span className="dot" />
